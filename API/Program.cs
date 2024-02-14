@@ -1,5 +1,6 @@
 using API.Extensions;
 using API.Middleware;
+using API.SignalR;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -34,6 +35,7 @@ app.UseAuthentication();
 app.UseAuthorization(); // Middelware for authorization
 
 app.MapControllers(); // Middleware to map our controllers
+app.MapHub<ChatHub>("/chat");
 
 using var scope = app.Services.CreateScope(); // using statement should be used if we want to destory the var again after is was used. 
 var services = scope.ServiceProvider;

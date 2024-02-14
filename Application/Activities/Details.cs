@@ -1,8 +1,8 @@
 using Application.Activities;
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -22,8 +22,10 @@ namespace Application
             private readonly DataContext _context;
             private readonly ILogger<Result<ActivityDto>> _logger;
             public readonly IMapper _mapper;
-            public Handler(DataContext context, ILogger<Result<ActivityDto>> logger, IMapper mapper)
+            private readonly IUserAccessor _userAccessor;
+            public Handler(DataContext context, ILogger<Result<ActivityDto>> logger, IMapper mapper, IUserAccessor userAccessor)
             {
+                _userAccessor = userAccessor;
                 _mapper = mapper;
                 _logger = logger;
                 _context = context;
@@ -31,7 +33,7 @@ namespace Application
 
             public async Task<Result<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var activity = await _context.Activities.ProjectTo<ActivityDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(x => x.Id == request.Id);
+                var activity = await _context.Activities.ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUsername() }).FirstOrDefaultAsync(x => x.Id == request.Id);
 
                 //if the id doesnt exist the activity is null
                 // if the id exists the activity is a Domain.Activity, it is the object with the values found in the DB_Context
